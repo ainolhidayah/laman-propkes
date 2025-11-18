@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analisis Kompetensi Peserta i-PROPKES</title>
+    <!-- Memuatkan Tailwind CSS untuk penggayaan -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Memuatkan Chart.js untuk carta -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Menggunakan fon Inter */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Memastikan kanvas carta responsif */
+        #chart-container {
+            position: relative;
+            height: 60vh;
+            width: 90%;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        /* Stail untuk kontena carta bar */
+        #bar-chart-container {
+            position: relative;
+            height: 70vh; /* Lebih tinggi untuk memuatkan banyak bar */
+            width: 95%;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 p-4 md:p-8">
+
+    <div class="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-lg">
+        
+        <h1 class="text-2xl md:text-3xl font-bold text-center text-blue-800 mb-6">
+            Analisis Kompetensi Peserta i-PROPKES (Pra)
+        </h1>
+
+        <!-- Mesej Status untuk memuatkan data -->
+        <div id="status" class="text-center text-gray-500 mb-4">
+            Sila muat naik fail CSV anda untuk bermula.
+        </div>
+
+        <!-- Pilihan Fail CSV -->
+        <div class="mb-6">
+            <label for="csv-upload" class="block text-sm font-medium text-gray-700 mb-2">
+                1. Muat Naik Fail CSV Anda (cth: data_propkes_pra.csv):
+            </label>
+            <input type="file" id="csv-upload" accept=".csv" class="w-full text-sm text-gray-500
+                file:mr-4 file:py-2 file:px-4
+                file:rounded-lg file:border-0 file:text-sm file:font-semibold
+                file:bg-blue-50 file:text-blue-700
+                hover:file:bg-blue-100
+            "/>
+        </div>
+
+        <!-- Pilihan Peserta -->
+        <div class="mb-6">
+            <label for="peserta-select" class="block text-sm font-medium text-gray-700 mb-2">
+                2. Pilih Peserta:
+            </label>
+            <select id="peserta-select" class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500" disabled>
+                <option>Sila muat naik fail CSV dahulu</option>
+                <!-- Pilihan akan diisi oleh JavaScript -->
+            </select>
+        </div>
+
+        <!-- Butang Toggle Paparan -->
+        <div class="mb-4 text-center">
+            <label class="block text-sm font-medium text-gray-700 mb-2">3. Pilih Paparan:</label>
+            <div class="inline-flex rounded-lg shadow-sm">
+                <button id="view-domain-btn" type="button" class="relative inline-flex items-center px-4 py-2 rounded-l-md border border-gray-300 bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 focus:z-10 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
+                    Paparan Domain (Radar)
+                </button>
+                <button id="view-item-btn" type="button" class="relative -ml-px inline-flex items-center px-4 py-2 rounded-r-md border border-gray-300 bg-white text-gray-700 text-sm font-medium hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
+                    Paparan Per Item (Bar)
+                </button>
+            </div>
+        </div>
+
+        <!-- Kawasan Carta Radar -->
+        <div id="chart-container" class="mb-6">
+            <canvas id="radar-chart"></canvas>
+        </div>
+
+        <!-- Kawasan Carta Bar (tersembunyi secara lalai) -->
+        <div id="bar-chart-container" class="mb-6" style="display: none;">
+            <canvas id="bar-chart"></canvas>
+        </div>
+
+        <!-- ** BARU: Petunjuk Item (tersembunyi secara lalai) ** -->
+        <div id="item-key-container" class="p-4 bg-gray-50 rounded-lg border" style="display: none;">
+            <h3 class="text-lg font-semibold text-center mb-3">Petunjuk Item</h3>
+            <div id="item-key-content" class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1 text-sm">
+                <!-- Kandungan akan diisi oleh JavaScript -->
+            </div>
+        </div>
+
+        <!-- Ringkasan Tahap -->
+        <div id="ringkasan" class="text-center p-4 bg-gray-50 rounded-lg border mt-6">
+            <!-- Ringkasan akan diisi oleh JavaScript -->
+        </div>
+
+    </div>
+
+    <script>
+        // --- KONFIGURASI ---
+        // Indeks kolum berdasarkan fail CSV
+        const NAMA_INDEX = 3; // Kolum 'NAMA PESERTA'
+        
+        // Pemetaan Domain kepada julat indeks kolum (bermula dari 0)
+        const DOMAIN_MAP = {
+            'Pengetahuan': { start: 7, end: 15 },    // Soalan 1-9
+            'Dasar & Matlamat': { start: 20, end: 23 }, // Soalan 14-17
+            'Instruksional': { start: 24, end: 27 },  // Soalan 18-21
+            'Inovasi': { start: 28, end: 31 },       // Soalan 22-25
+            'Hubungan': { start: 32, end: 36 },     // Soalan 26-30
+            'Sumber': { start: 37, end: 40 },       // Soalan 31-34
+            'Kendiri': { start: 41, end: 44 }        // Soalan 35-38
+        };
+        const DOMAIN_LABELS = Object.keys(DOMAIN_MAP);
+
+        // ** DIKEMAS KINI: Pemetaan Item Individu dengan Tajuk **
+        // (P=Pengetahuan, D=Dasar, I=Instruksional, N=Inovasi, H=Hubungan, S=Sumber, K=Kendiri)
+        const ITEM_DEFINITIONS = [
+            { label: 'P1', index: 7,  title: 'Pengetahuan: Kepimpinan Organisasi' }, 
+            { label: 'P2', index: 8,  title: 'Pengetahuan: Pengurusan Kurikulum' }, 
+            { label: 'P3', index: 9,  title: 'Pengetahuan: Pengurusan Kokurikulum' }, 
+            { label: 'P4', index: 10, title: 'Pengetahuan: Pengurusan Hal Ehwal Murid' }, 
+            { label: 'P5', index: 11, title: 'Pengetahuan: Pengurusan Kewangan' }, 
+            { label: 'P6', index: 12, title: 'Pengetahuan: Pengurusan Pentadbiran Pejabat' }, 
+            { label: 'P7', index: 13, title: 'Pengetahuan: Pengurusan Persekitaran & Fizikal' }, 
+            { label: 'P8', index: 14, title: 'Pengetahuan: Pengurusan Sumber Manusia' }, 
+            { label: 'P9', index: 15, title: 'Pengetahuan: Pengurusan Perhubungan Luar' },
+            
+            { label: 'D1', index: 20, title: 'Dasar: Membina Visi' }, 
+            { label: 'D2', index: 21, title: 'Dasar: Fokus kepada Kualiti' }, 
+            { label: 'D3', index: 22, title: 'Dasar: Pemikiran Strategik' }, 
+            { label: 'D4', index: 23, title: 'Dasar: Proaktif' },
+            
+            { label: 'I1', index: 24, title: 'Instruksional: Berorientasikan Pencapaian' }, 
+            { label: 'I2', index: 25, title: 'Instruksional: Perancangan Instruksional' }, 
+            { label: 'I3', index: 26, title: 'Instruksional: Perkongsian Pengetahuan' }, 
+            { label: 'I4', index: 27, title: 'Instruksional: Menyelia P&P' },
+            
+            { label: 'N1', index: 28, title: 'Inovasi: Penyelesaian Masalah' }, 
+            { label: 'N2', index: 29, title: 'Inovasi: Mengurus Perubahan' }, 
+            { label: 'N3', index: 30, title: 'Inovasi: Penambahbaikan Sekolah' }, 
+            { label: 'N4', index: 31, title: 'Inovasi: Kreativiti' },
+            
+            { label: 'H1', index: 32, title: 'Hubungan: Membangun Kapasiti' }, 
+            { label: 'H2', index: 33, title: 'Hubungan: Komunikasi Berkesan' }, 
+            { label: 'H3', index: 34, title: 'Hubungan: Membina Jaringan (1)' }, // Tajuk asal mungkin sama
+            { label: 'H4', index: 35, title: 'Hubungan: Membina Jaringan (2)' }, // Tajuk asal mungkin sama
+            { label: 'H5', index: 36, title: 'Hubungan: Kerja Sepasukan' },
+            
+            { label: 'S1', index: 37, title: 'Sumber: Pengurusan Kewangan' }, 
+            { label: 'S2', index: 38, title: 'Sumber: Pembangunan Fizikal & Persekitaran' }, 
+            { label: 'S3', index: 39, title: 'Sumber: Pengurusan ICT' }, 
+            { label: 'S4', index: 40, title: 'Sumber: Pengurusan Prestasi' },
+            
+            { label: 'K1', index: 41, title: 'Kendiri: Sedar Kekuatan & Kelemahan' }, 
+            { label: 'K2', index: 42, title: 'Kendiri: Pengurusan Kendiri' }, 
+            { label: 'K3', index: 43, title: 'Kendiri: Peka Terhadap Orang Lain' }, 
+            { label: 'K4', index: 44, title: 'Kendiri: Menyesuaikan Diri' }
+        ];
+
+        // --- PEMBOLEHUBAH GLOBAL ---
+        let pesertaData = [];
+        let radarChart = null;
+        let barChart = null; 
+        const statusEl = document.getElementById('status');
+        const selectEl = document.getElementById('peserta-select');
+        const ringkasanEl = document.getElementById('ringkasan');
+        const uploadEl = document.getElementById('csv-upload');
+
+        // Rujukan untuk elemen-elemen baru
+        const viewDomainBtn = document.getElementById('view-domain-btn');
+        const viewItemBtn = document.getElementById('view-item-btn');
+        const radarContainer = document.getElementById('chart-container');
+        const barContainer = document.getElementById('bar-chart-container');
+        const itemKeyContainer = document.getElementById('item-key-container'); // ** BARU **
+        const itemKeyContent = document.getElementById('item-key-content'); // ** BARU **
+
+        // --- FUNGSI ---
+
+        /**
+         * Fungsi untuk mem-parse satu baris CSV dengan betul
+         */
+        function parseCSVRow(rowStr) {
+            const fields = [];
+            let inQuote = false;
+            let currentField = '';
+            
+            for (let i = 0; i < rowStr.length; i++) {
+                const char = rowStr[i];
+                
+                if (char === '"') {
+                    if (inQuote && rowStr[i+1] === '"') {
+                        currentField += '"';
+                        i++; 
+                    } else {
+                        inQuote = !inQuote; 
+                    }
+                } else if (char === ',' && !inQuote) {
+                    fields.push(currentField);
+                    currentField = '';
+                } else {
+                    currentField += char;
+                }
+            }
+            fields.push(currentField);
+            
+            return fields.map(field => {
+                if (field.startsWith('"') && field.endsWith('"')) {
+                    return field.substring(1, field.length - 1).replace(/""/g, '"');
+                }
+                return field;
+            });
+        }
+
+
+        /**
+         * Mengira purata untuk julat indeks dalam satu baris data
+         */
+        function calculateAverage(row, start, end) {
+            let sum = 0;
+            let count = 0;
+            for (let i = start; i <= end; i++) {
+                if (row[i] !== undefined) {
+                    const value = parseFloat(row[i]);
+                    if (!isNaN(value)) {
+                        sum += value;
+                        count++;
+                    } 
+                }
+            }
+            return count > 0 ? (sum / count) : 0;
+        }
+
+        /**
+         * Mendapatkan tahap berdasarkan skor purata
+         */
+        function getTahap(skor) {
+            if (skor >= 9.0) return { tahap: 'Cemerlang', color: 'text-green-700' };
+            if (skor >= 7.0) return { tahap: 'Tinggi', color: 'text-blue-700' };
+            if (skor >= 4.0) return { tahap: 'Sederhana', color: 'text-yellow-700' };
+            return { tahap: 'Asas', color: 'text-red-700' };
+        }
+
+        /**
+         * Mengendalikan fail yang dimuat naik
+         */
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) {
+                statusEl.textContent = "Tiada fail dipilih.";
+                statusEl.className = "text-center text-red-600 font-bold mb-4";
+                return;
+            }
+
+            statusEl.textContent = `Memproses fail ${file.name}...`;
+            statusEl.className = "text-center text-gray-500 mb-4";
+            selectEl.disabled = true;
+            selectEl.innerHTML = '<option>Memproses data...</option>';
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const csvText = e.target.result;
+                processData(csvText); 
+            };
+            reader.onerror = function() {
+                statusEl.textContent = "Gagal membaca fail.";
+                statusEl.className = "text-center text-red-600 font-bold mb-4";
+            };
+            reader.readAsText(file);
+        }
+
+        /**
+         * Memproses data CSV dari teks
+         */
+        function processData(csvText) {
+            try {
+                pesertaData = [];
+                const rows = csvText.split(/\r?\n/).filter(row => row.trim() !== '');
+                
+                pesertaData = rows.slice(1).map(rowStr => {
+                    const row = parseCSVRow(rowStr);
+                    
+                    if (!row[NAMA_INDEX] || row[NAMA_INDEX].trim() === '') {
+                        console.warn("Baris dilangkau (tiada nama):", row);
+                        return null; 
+                    }
+                    
+                    const nama = row[NAMA_INDEX].trim();
+                    let skorDomain = {};
+                    let totalSum = 0;
+                    let totalCount = 0;
+
+                    DOMAIN_LABELS.forEach(domain => {
+                        const { start, end } = DOMAIN_MAP[domain];
+                        const avg = calculateAverage(row, start, end);
+                        skorDomain[domain] = avg;
+                        
+                        for (let i = start; i <= end; i++) {
+                            if (row[i] !== undefined) {
+                                const value = parseFloat(row[i]);
+                                if (!isNaN(value)) {
+                                    totalSum += value;
+                                    totalCount++;
+                                }
+                            }
+                        }
+                    });
+
+                    // Mengira skor setiap item
+                    const skorItem = ITEM_DEFINITIONS.map(item => {
+                        let score = parseFloat(row[item.index]);
+                        if (isNaN(score)) score = 0; 
+                        return { label: item.label, score: score, title: item.title }; // Simpan tajuk
+                    });
+
+                    const skorKeseluruhan = totalCount > 0 ? (totalSum / totalCount) : 0;
+                    const { tahap, color } = getTahap(skorKeseluruhan);
+
+                    return {
+                        nama,
+                        skorDomain,
+                        skorItem, 
+                        skorKeseluruhan,
+                        tahap,
+                        tahapColor: color
+                    };
+                }).filter(p => p !== null); 
+
+                populateDropdown();
+                populateKey(); // ** BARU: Panggil fungsi untuk mengisi petunjuk **
+                selectEl.disabled = false; 
+                
+                selectEl.addEventListener('change', (e) => {
+                    updateDisplays(e.target.value); 
+                });
+
+                if (pesertaData.length > 0) {
+                    updateDisplays(pesertaData[0].nama); 
+                    statusEl.textContent = `Berjaya memuatkan ${pesertaData.length} respons.`;
+                    statusEl.className = "text-center text-green-600 mb-4";
+                } else {
+                    throw new Error("Tiada data peserta ditemui dalam fail. Semak format CSV atau pemetaan indeks.");
+                }
+
+            } catch (error) {
+                console.error("Ralat memproses data:", error);
+                statusEl.textContent = `Ralat: ${error.message}`;
+                statusEl.className = "text-center text-red-600 font-bold mb-4";
+                selectEl.innerHTML = '<option>Gagal memuatkan data</option>';
+                selectEl.disabled = true;
+            }
+        }
+
+        /**
+         * Mengisi senarai dropdown dengan nama peserta
+         */
+        function populateDropdown() {
+            selectEl.innerHTML = ''; 
+            pesertaData.forEach(peserta => {
+                const option = document.createElement('option');
+                option.value = peserta.nama;
+                option.textContent = peserta.nama;
+                selectEl.appendChild(option);
+            });
+        }
+
+        /**
+         * ** BARU: Fungsi untuk mengisi Petunjuk Item **
+         */
+        function populateKey() {
+            itemKeyContent.innerHTML = ''; // Kosongkan
+            ITEM_DEFINITIONS.forEach(item => {
+                const el = document.createElement('p');
+                el.innerHTML = `<span class="font-bold">${item.label}:</span> ${item.title}`;
+                itemKeyContent.appendChild(el);
+            });
+        }
+
+
+        /**
+         * Fungsi utama untuk mengemas kini semua paparan
+         */
+        function updateDisplays(namaPeserta) {
+            const peserta = pesertaData.find(p => p.nama === namaPeserta);
+            if (!peserta) return;
+
+            // 1. Kemas kini Carta Radar
+            updateRadarChart(peserta);
+            
+            // 2. Kemas kini Carta Bar
+            updateBarChart(peserta);
+
+            // 3. Kemas kini Ringkasan
+            ringkasanEl.innerHTML = `
+                <h3 class="text-lg font-semibold">Ringkasan untuk: ${peserta.nama}</h3>
+                <p class="text-xl mt-2">
+                    Skor Purata Keseluruhan: 
+                    <span class="font-bold ${peserta.tahapColor}">${peserta.skorKeseluruhan.toFixed(2)}</span>
+                </p>
+                <p class="text-xl mt-1">
+                    Tahap Kompetensi: 
+                    <span class="font-bold ${peserta.tahapColor}">${peserta.tahap}</span>
+                </p>
+            `;
+        }
+
+        /**
+         * Mengemaskini carta radar
+         */
+        function updateRadarChart(peserta) {
+            const data = DOMAIN_LABELS.map(domain => peserta.skorDomain[domain].toFixed(2));
+
+            if (!radarChart) {
+                const ctx = document.getElementById('radar-chart').getContext('2d');
+                radarChart = new Chart(ctx, {
+                    type: 'radar',
+                    data: {
+                        labels: DOMAIN_LABELS.map(l => l.replace('&', '&\n')), 
+                        datasets: [{
+                            label: 'Skor Purata Domain',
+                            data: data,
+                            backgroundColor: 'rgba(30, 64, 175, 0.2)', 
+                            borderColor: 'rgba(30, 64, 175, 1)', 
+                            borderWidth: 2,
+                            pointBackgroundColor: 'rgba(30, 64, 175, 1)',
+                            pointRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            r: {
+                                min: 0,
+                                max: 10,
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 2,
+                                    backdropColor: 'rgba(255, 255, 255, 0.75)',
+                                    color: '#333'
+                                },
+                                pointLabels: {
+                                    font: {
+                                        size: 11,
+                                        weight: 'bold'
+                                    },
+                                    color: '#111'
+                                },
+                                grid: {
+                                    color: '#ccc'
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                labels: {
+                                    font: {
+                                        size: 14
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        label += context.formattedValue;
+                                        return label;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            } else {
+                radarChart.data.datasets[0].data = data;
+                radarChart.update();
+            }
+        }
+
+        /**
+         * Fungsi untuk mencipta/mengemas kini Carta Bar
+         */
+        function updateBarChart(peserta) {
+            const labels = peserta.skorItem.map(item => item.label);
+            const data = peserta.skorItem.map(item => item.score);
+            const titles = peserta.skorItem.map(item => item.title); // ** BARU: Dapatkan tajuk **
+
+            // Mewarnakan bar berdasarkan domain
+            const backgroundColors = [];
+            labels.forEach(label => {
+                if (label.startsWith('P')) backgroundColors.push('rgba(255, 99, 132, 0.6)'); // Merah (Pengetahuan)
+                else if (label.startsWith('D')) backgroundColors.push('rgba(54, 162, 235, 0.6)'); // Biru (Dasar)
+                else if (label.startsWith('I')) backgroundColors.push('rgba(255, 206, 86, 0.6)'); // Kuning (Instruksional)
+                else if (label.startsWith('N')) backgroundColors.push('rgba(75, 192, 192, 0.6)'); // Hijau (Inovasi)
+                else if (label.startsWith('H')) backgroundColors.push('rgba(153, 102, 255, 0.6)'); // Ungu (Hubungan)
+                else if (label.startsWith('S')) backgroundColors.push('rgba(255, 159, 64, 0.6)'); // Oren (Sumber)
+                else if (label.startsWith('K')) backgroundColors.push('rgba(100, 100, 100, 0.6)'); // Kelabu (Kendiri)
+                else backgroundColors.push('rgba(201, 203, 207, 0.6)');
+            });
+
+            if (!barChart) {
+                const ctx = document.getElementById('bar-chart').getContext('2d');
+                barChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Skor', // Label ringkas untuk dataset
+                            data: data,
+                            backgroundColor: backgroundColors,
+                            borderColor: backgroundColors.map(color => color.replace('0.6', '1')),
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        indexAxis: 'x', 
+                        scales: {
+                            y: { 
+                                min: 0,
+                                max: 10,
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1
+                                }
+                            },
+                            x: { 
+                                ticks: {
+                                    font: {
+                                        size: 10
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false 
+                            },
+                            // ** DIKEMAS KINI: Tooltip kustom **
+                            tooltip: {
+                                callbacks: {
+                                    title: function(tooltipItems) {
+                                        // Dapatkan indeks item yang di-hover
+                                        const index = tooltipItems[0].dataIndex;
+                                        // Dapatkan tajuk penuh dari array 'titles'
+                                        return titles[index] || '';
+                                    },
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        label += context.formattedValue;
+                                        return label;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            } else {
+                barChart.data.labels = labels;
+                barChart.data.datasets[0].data = data;
+                barChart.data.datasets[0].backgroundColor = backgroundColors;
+                barChart.data.datasets[0].borderColor = backgroundColors.map(color => color.replace('0.6', '1'));
+                // ** BARU: Kemas kini data tajuk untuk tooltip **
+                barChart.options.plugins.tooltip.callbacks.title = function(tooltipItems) {
+                    const index = tooltipItems[0].dataIndex;
+                    return titles[index] || '';
+                };
+                barChart.update();
+            }
+        }
+
+        // --- MULAKAN APLIKASI ---
+        uploadEl.addEventListener('change', handleFileUpload);
+
+        // Event listener untuk butang toggle
+        viewDomainBtn.addEventListener('click', () => {
+            radarContainer.style.display = 'block';
+            barContainer.style.display = 'none';
+            itemKeyContainer.style.display = 'none'; // ** BARU: Sembunyikan petunjuk **
+            // Kemas kini stail butang
+            viewDomainBtn.classList.add('bg-blue-600', 'text-white');
+            viewDomainBtn.classList.remove('bg-white', 'text-gray-700');
+            viewItemBtn.classList.add('bg-white', 'text-gray-700');
+            viewItemBtn.classList.remove('bg-blue-600', 'text-white');
+        });
+
+        viewItemBtn.addEventListener('click', () => {
+            radarContainer.style.display = 'none';
+            barContainer.style.display = 'block';
+            itemKeyContainer.style.display = 'block'; // ** BARU: Paparkan petunjuk **
+            // Kemas kini stail butang
+            viewItemBtn.classList.add('bg-blue-600', 'text-white');
+            viewItemBtn.classList.remove('bg-white', 'text-gray-700');
+            viewDomainBtn.classList.add('bg-white', 'text-gray-700');
+            viewDomainBtn.classList.remove('bg-blue-600', 'text-white');
+        });
+
+    </script>
+</body>
+</html>
