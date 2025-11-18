@@ -5,547 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Laman Utama PROPKES</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-        .content-section {
-            display: none; /* Sembunyikan semua seksyen secara lalai */
-        }
-        .content-section.active {
-            display: block; /* Paparkan hanya yang aktif */
-        }
-        /* Stail untuk butang nav yang aktif */
-        .nav-button.active {
-            background-color: #1D4ED8; /* Biru pekat */
-            color: white;
-        }
-
-        /* --- STail BARU untuk Carta Alir --- */
-        .timeline-path {
-            /* Letakkan 'position: relative' pada 'section#tanggungjawab' 
-               untuk memastikan 'absolute' ini berfungsi dengan betul di dalamnya.
-            */
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 4px;
-            background: #d1d5db;
-        }
-        .milestone {
-            opacity: 0;
-            transform: translateY(20px);
-            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
-        }
-        .milestone.is-visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        .milestone-dot {
-            position: absolute;
-            top: 2.5rem; 
-            left: 50%;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            border: 4px solid white;
-            background-color: #4f46e5;
-            transform: translateX(-50%);
-            z-index: 10;
-            transition: background-color 0.5s ease;
-        }
-        .milestone-card {
-            width: calc(50% - 2.5rem); 
-        }
-        .milestone:nth-child(even) .milestone-card {
-            margin-left: calc(50% + 2.5rem);
-        }
-        .milestone:nth-child(odd) .milestone-card {
-            margin-right: calc(50% + 2.5rem);
-            text-align: right;
-            align-items: flex-end; 
-        }
-        
-        .task-button {
-            background-image: linear-gradient(to right, #4f46e5 0%, #818cf8 100%);
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        .task-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 7px 14px rgba(0,0,0,0.1);
-        }
-        
-        .loader {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #3498db;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .ai-results h3 {
-            font-size: 1.25rem;
-            font-weight: bold;
-            margin-top: 1.5rem;
-            margin-bottom: 0.5rem;
-            color: #1e3a8a;
-        }
-        .ai-results ul {
-            list-style-type: disc;
-            margin-left: 1.5rem;
-            margin-top: 0.5rem;
-            color: #374151;
-            line-height: 1.6;
-        }
-
-        @media (max-width: 768px) {
-            .timeline-path {
-                left: 1.25rem; 
-            }
-            .milestone-dot {
-                left: 1.25rem; 
-            }
-            .milestone-card {
-                width: calc(100% - 3.5rem); 
-                margin-left: 3.5rem !important;
-                text-align: left !important;
-                align-items: flex-start !important;
-            }
-        }
-    </style>
-</head>
-<body class="bg-gray-100 text-gray-800">
-
-    <header class="bg-blue-800 text-white p-6 shadow-md">
-        <div class="container mx-auto max-w-5xl">
-            <h1 class="text-3xl font-bold">Laman PROPKES</h1>
-            <p class="text-lg text-blue-100">Program Peningkatan Profesional Pengurusan dan Kepimpinan Sekolah</p>
-        </div>
-    </header>
-
-    <div class="container mx-auto max-w-5xl mt-[-30px] px-4">
-    
-        <nav class="bg-white rounded-lg shadow-lg p-3 flex flex-wrap justify-center gap-2 mb-6">
-            <button class="nav-button active px-4 py-2 rounded-md font-semibold text-gray-700 hover:bg-blue-100" onclick="showSection('utama')">
-                Utama
-            </button>
-            <button class="nav-button px-4 py-2 rounded-md font-semibold text-gray-700 hover:bg-blue-100" onclick="showSection('tanggungjawab')">
-                Tanggungjawab Peserta
-            </button>
-            <button class="nav-button px-4 py-2 rounded-md font-semibold text-gray-700 hover:bg-blue-100" onclick="showSection('galeri')">
-                Galeri & Muat Naik
-            </button>
-            <button class="nav-button px-4 py-2 rounded-md font-semibold text-gray-700 hover:bg-blue-100" onclick="showSection('kompetensi')">
-                Semakan Kompetensi
-            </button>
-        </nav>
-
-        <div class="bg-white rounded-lg shadow-xl p-6 md:p-10 min-h-[400px]">
-
-            <section id="utama" class="content-section active space-y-4">
-                <h2 class="text-2xl font-bold text-blue-800 border-b-2 border-blue-200 pb-2">Selamat Datang ke Laman PROPKES</h2>
-                
-                <p class="text-lg">
-                    Ini adalah hab maklumat pusat anda untuk Program Peningkatan Profesional Pengurusan dan Kepimpinan Sekolah (PROPKES). Di sini anda boleh mencari maklumat penting, pautan, dan tanggungjawab anda sebagai peserta.
-                </p>
-
-                <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-md">
-                    <h3 class="text-xl font-semibold text-blue-900">Objektif Program</h3>
-                    <ul class="list-disc list-inside mt-2 space-y-1">
-                        <li>(Placeholder) Meningkatkan pengetahuan dan kemahiran...</li>
-                        <li>(Placeholder) Membangunkan kompetensi kepimpinan...</li>
-                        <li>(Placeholder) Menerajui perubahan dan inovasi di sekolah...</li>
-                    </ul>
-                </div>
-                
-                <h3 class="text-xl font-semibold text-blue-900 pt-4">Struktur Program</h3>
-                <p>(Placeholder) Program ini terdiri daripada beberapa fasa yang merangkumi pembelajaran secara bersemuka, dalam talian, dan tugasan lapangan...</p>
-
-            </section>
-
-            <section id="tanggungjawab" class="content-section relative overflow-hidden">
-                
-                <header class="text-center mb-12">
-                    <h1 class="text-4xl font-extrabold text-gray-800 tracking-tight">Carta Alir Interaktif PROPKES 2025-2026</h1>
-                    <p class="text-lg text-gray-500 mt-2 max-w-3xl mx-auto">Perjalanan Peningkatan Profesionalisme anda.</p>
-                </header>
-        
-                <div class="relative">
-                    <div class="timeline-path"></div>
-                    
-                    <div class="milestone relative mb-12">
-                        <div class="milestone-dot"></div>
-                        <div class="milestone-card flex flex-col items-start bg-white p-6 rounded-xl shadow-lg border border-gray-200">
-                            <time class="font-semibold text-sm text-indigo-600">Oktober 2025</time>
-                            <h3 class="text-2xl font-bold text-indigo-600 mt-2">Fasa 1: Persediaan Awal</h3>
-                            <p class="text-gray-500 mt-2">Langkah pertama untuk memulakan perjalanan pembelajaran anda</p>
-                            <div class="mt-4 space-y-2 text-sm text-gray-700 w-full">
-                                <p><strong>1. Kenal Pasti Lokasi (4 Okt)</strong></p>
-                                <p><strong>2. Taklimat Peserta (24 Okt)</strong></p>
-                                <p><strong>3. Taklimat Bersama (28 Okt)</strong></p>
-                            </div>
-                            <div class="flex flex-wrap gap-3 mt-4">
-                                <a href="https://docs.google.com/spreadsheets/d/1Brh6wdw78O3u1GUGkwCgGp38AyegvLh5l1ZjyLm7Yks/edit?usp=sharing" target="_blank" class="task-button text-white font-semibold py-2 px-4 rounded-lg">Senarai Penempatan</a>
-                                <a href="https://meet.google.com/okk-hnod-bcf" target="_blank" class="task-button text-white font-semibold py-2 px-4 rounded-lg">Pautan Taklimat Peserta</a>
-                                <a href="https://meet.google.com/pcd-cixo-ize" target="_blank" class="task-button text-white font-semibold py-2 px-4 rounded-lg">Pautan Taklimat Bersama</a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="milestone relative mb-12">
-                         <div class="milestone-dot"></div>
-                         <div class="milestone-card flex flex-col items-start bg-white p-6 rounded-xl shadow-lg border border-gray-200">
-                            <time class="font-semibold text-sm text-indigo-600">4 November 2025</time>
-                            <h3 class="text-2xl font-bold text-indigo-600 mt-2">Fasa 2: Pra-Program</h3>
-                            <p class="text-gray-500 mt-2">Menjawab instrumen awal untuk mengukur tahap persediaan anda.</p>
-                             <div class="mt-4 space-y-2 text-sm text-gray-700 w-full">
-                                 <p><strong>4. Jawab Instrumen i-PROPKES (Pra)</strong></p>
-                            </div>
-                            <a href="https://forms.gle/cxY72SJ1Ndqdsdhp6" target="_blank" class="task-button text-white font-semibold py-2 px-4 rounded-lg mt-4">Jawab Instrumen Pra</a>
-                        </div>
-                    </div>
-
-                     <div class="milestone relative mb-12">
-                         <div class="milestone-dot"></div>
-                         <div class="milestone-card flex flex-col items-start bg-white p-6 rounded-xl shadow-lg border border-gray-200">
-                            <time class="font-semibold text-sm text-indigo-600">3 Nov - 12 Dis 2025</time>
-                            <h3 class="text-2xl font-bold text-indigo-600 mt-2">Fasa 3: Pelaksanaan (Fasa 1)</h3>
-                            <p class="text-gray-500 mt-2">Masa untuk turun padang! Fasa pertama sandaran anda.</p>
-                             <div class="mt-4 space-y-2 text-sm text-gray-700 w-full">
-                                 <p><strong>5. Ikuti Program Fasa 1</strong></p>
-                                 <p><strong>6. Lengkapkan Log Harian</strong></p>
-                                 <p><strong>7. Penulisan Jurnal Kepimpinan</strong></p>
-                                 <p><strong>12. Mulakan Penulisan Artikel</strong></p>
-                                 <p><strong>13 & 14. Dapatkan Maklum Balas Mentor & Pemandu Citra</strong></p>
-                            </div>
-                            <div class="flex flex-wrap gap-3 mt-4">
-                                <a href="https://docs.google.com/presentation/d/1feE3SBwJ-mHK2Bw6oqljoB33LBXdYnsT/edit?usp=sharing&ouid=103468715679062145551&rtpof=true&sd=true" target="_blank" class="task-button text-white font-semibold py-2 px-4 rounded-lg">Lihat Jadual Program</a>
-                                <a href="https://forms.gle/qCPqGMydsUQ5Xmni9" target="_blank" class="task-button text-white font-semibold py-2 px-4 rounded-lg">Isi Log Harian</a>
-                                <a href="https://docs.google.com/document/d/1l7WVAJkdCzbsdgwDwnmsVIHzVFnMgWtU/edit?usp=drive_link&ouid=103468715679062145551&rtpof=true&sd=true" target="_blank" class="task-button text-white font-semibold py-2 px-4 rounded-lg">Isi Jurnal Kepimpinan</a>
-                                <a href="https://docs.google.com/document/d/1iLni5bUkhWme_dyX-gb_tgS8b_TKlqem/edit?usp=sharing&ouid=103468715679062145551&rtpof=true&sd=true" target="_blank" class="task-button text-white font-semibold py-2 px-4 rounded-lg">Templat Artikel</a>
-                                <a href="https://docs.google.com/document/d/184UPFnp9mCdRTrsNDiqYA74JJT0N4JsD/edit?usp=sharing&ouid=103468715679062145551&rtpof=true&sd=true" target="_blank" class="task-button text-white font-semibold py-2 px-4 rounded-lg">Borang Maklum Balas Mentor</a>
-                                <a href="https://docs.google.com/document/d/1AbosvxFoj2Vx0Ct1AE0wOkhusePFtkRI/edit?usp=sharing&ouid=103468715679062145551&rtpof=true&sd=true" target="_blank" class="task-button text-white font-semibold py-2 px-4 rounded-lg">Borang Maklum Balas Pemandu Citra</a>
-                            </div>
-                        </div>
-                    </div>
-                    
-                     <div class="milestone relative mb-12">
-                         <div class="milestone-dot"></div>
-                         <div class="milestone-card flex flex-col items-start bg-white p-6 rounded-xl shadow-lg border border-gray-200">
-                            <time class="font-semibold text-sm text-indigo-600">16 Feb - 27 Mac 2026*</time>
-                            <h3 class="text-2xl font-bold text-indigo-600 mt-2">Fasa 4: Pelaksanaan (Fasa 2)</h3>
-                            <p class="text-gray-500 mt-2">Teruskan momentum dan kumpulkan maklum balas penting.</p>
-                             <div class="mt-4 space-y-2 text-sm text-gray-700 w-full">
-                                 <p><strong>8. Ikuti Program Fasa 2</strong></p>
-                                 <p><strong>9. Teruskan Log Harian</strong></p>
-                                 <p><strong>10. Penulisan Jurnal Kepimpinan</strong></p>
-                                 <p><strong>12. Teruskan Penulisan Artikel</strong></p>
-                                 <p><strong>13 & 14. Dapatkan Maklum Balas Mentor & Pemandu Citra</strong></p>
-                            </div>
-                            <div class="flex flex-wrap gap-3 mt-4">
-                                <a href="https://docs.google.com/presentation/d/1feE3SBwJ-mHK2Bw6oqljoB33LBXdYnsT/edit?usp=sharing&ouid=103468715679062145551&rtpof=true&sd=true" target="_blank" class="task-button text-white font-semibold py-2 px-4 rounded-lg">Lihat Jadual Program</a>
-                                <a href="https://forms.gle/qCPqGMydsUQ5Xmni9" target="_blank" class="task-button text-white font-semibold py-2 px-4 rounded-lg mt-4">Isi Log Harian</a>
-                                <a href="https://docs.google.com/document/d/1l7WVAJkdCzbsdgwDwnmsVIHzVFnMgWtU/edit?usp=drive_link&ouid=103468715679062145551&rtpof=true&sd=true" target="_blank" class="task-button text-white font-semibold py-2 px-4 rounded-lg">Jurnal Kepimpinan</a>
-                                <a href="https://docs.google.com/document/d/184UPFnp9mCdRTrsNDiqYA74JJT0N4JsD/edit?usp=sharing&ouid=103468715679062145551&rtpof=true&sd=true" target="_blank" class="task-button text-white font-semibold py-2 px-4 rounded-lg">Borang Maklum Balas Mentor</a>
-                                <a href="https://docs.google.com/document/d/1AbosvxFoj2Vx0Ct1AE0wOkhusePFtkRI/edit?usp=sharing&ouid=103468715679062145551&rtpof=true&sd=true" target="_blank" class="task-button text-white font-semibold py-2 px-4 rounded-lg">Borang Maklum Balas Pemandu Citra</a>
-                            </div>
-                        </div>
-                    </div>
-                    
-                     <div class="milestone relative mb-12">
-                         <div class="milestone-dot"></div>
-                         <div class="milestone-card flex flex-col items-start bg-white p-6 rounded-xl shadow-lg border border-gray-200">
-                            <time class="font-semibold text-sm text-indigo-600">28 - 29 Mac 2026*</time>
-                            <h3 class="text-2xl font-bold text-indigo-600 mt-2">Fasa 5: Penilaian & Penghantaran</h3>
-                            <p class="text-gray-500 mt-2">Peringkat akhir program. Hantar semua tugasan.</p>
-                             <div class="mt-4 space-y-2 text-sm text-gray-700 w-full">
-                                 <p><strong>11. Jawab Instrumen i-PROPKES (Pasca)</strong></p>
-                                 <p><strong>15. Hantar Semua Tugasan Akhir</strong></p>
-                            </div>
-                             <div class="flex flex-wrap gap-3 mt-4">
-                                 <a href="https://forms.gle/Sd3XETfSo8QzE3n87" target="_blank" class="task-button text-white font-semibold py-2 px-4 rounded-lg">Jawab Instrumen Pasca</a>
-                                 <a href="https://drive.google.com/drive/folders/1PfzBbH5CftPJJqoZGpPMD8n8O3UdpnXp?usp=sharing" target="_blank" class="task-button text-white font-semibold py-2 px-4 rounded-lg">Hantar Tugasan Akhir</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <section class="mt-12 bg-gray-50 p-6 rounded-xl shadow-inner border border-gray-200">
-                    <div class="text-center">
-                        <h2 class="text-3xl font-bold text-gray-800">✨ Jana Cadangan Fokus PROPKES Anda</h2>
-                        <p class="mt-2 text-gray-600 max-w-2xl mx-auto">Gunakan AI untuk mendapatkan idea kajian yang spesifik berdasarkan pengalaman dan minat anda.</p>
-                    </div>
-                    
-                    <div class="max-w-2xl mx-auto mt-8">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label for="career-stage" class="block text-sm font-medium text-gray-700">Peringkat Kerjaya Anda</label>
-                                <select id="career-stage" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
-                                    <option value="Pensyarah Baharu (< 3 tahun)">Pensyarah Baharu (&lt; 3 tahun)</option>
-                                    <option value="Tiada Pengalaman Pengurusan">Tiada Pengalaman Pengurusan</option>
-                                    <option value="Pensyarah Berpengalaman">Pensyarah Berpengalaman</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label for="interest-area" class="block text-sm font-medium text-gray-700">Bidang Minat Utama</label>
-                                <select id="interest-area" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
-                                    <option>Pengurusan dan Kepimpinan Organisasi</option>
-                                    <option>Pengurusan Kurikulum</option>
-                                    <option>Pengurusan KoKurikulum</option>
-                                    <option>Pengurusan Hal Ehwal Murid</option>
-                                    <option>Pengurusan Kewangan & Pentadbiran Pejabat</option>
-                                    <option>Pengurusan Persekitaran dan Pembangunan Fizikal</option>
-                                    <option>Pengurusan dan Pembangunan Sumber Manusia</option>
-                                    <option>Pengurusan Perhubungan Luar</option>
-                                    <option>Pengurusan Digital</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="mt-6 text-center">
-                            <button id="generate-button" class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-transform transform hover:scale-105">
-                                Jana Cadangan
-                            </button>
-                        </div>
-                    </div>
-
-                    <div id="ai-results-container" class="mt-8"></div>
-                </section>
-
-                <footer class="text-center mt-8">
-                    <p class="text-sm text-gray-500">*Nota: Tarikh bagi Fasa 2 adalah tertakluk kepada perubahan.</p>
-                </footer>
-                </section>
-            
-            <section id="galeri" class="content-section space-y-4">
-                <h2 class="text-2xl font-bold text-blue-800 border-b-2 border-blue-200 pb-2">Galeri & Muat Naik Bahan</h2>
-                
-                <p class="text-lg">
-                    Peserta digalakkan untuk memuat naik gambar dan bahan tugasan ke folder Google Drive yang dikongsi.
-                </p>
-                
-                <p class="text-gray-600">
-                    Sila muat naik semua bahan anda (gambar program, tugasan, dll.) ke pautan di bawah. Pastikan anda menamakan fail anda mengikut format yang ditetapkan.
-                </p>
-
-                <a href="PAUTAN_GOOGLE_DRIVE_ANDA_DI_SINI" 
-                   target="_blank" 
-                   class="inline-block bg-green-600 text-white font-bold text-lg px-8 py-3 rounded-lg shadow-md hover:bg-green-700 transition duration-300">
-                    Buka Folder Muat Naik Google Drive
-                </a>
-
-            </section>
-
-            <section id="kompetensi" class="content-section space-y-4">
-                <h2 class="text-2xl font-bold text-blue-800 border-b-2 border-blue-200 pb-2">Semakan Kompetensi Individu</h2>
-                
-                <p class="text-lg">
-                    Anda boleh menyemak laporan kompetensi individu (i-PROPKES Pra) anda melalui pautan unik yang telah dihantar kepada anda melalui e-mel atau mesej.
-                </p>
-                <p class="text-gray-600">
-                    Jika anda mempunyai pautan unik anda, klik butang di bawah. Jika tidak, sila rujuk e-mel anda.
-                </p>
-                
-                <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded-md">
-                    <h3 class="text-xl font-semibold text-yellow-900">Peringatan Privasi</h3>
-                    <p class="mt-1">
-                        Pautan ke laporan anda adalah unik untuk anda sahaja. Sila jangan kongsikan pautan unik anda dengan peserta lain.
-                    </p>
-                    <p class="mt-2">
-                        Contoh pautan unik anda kelihatan seperti: <br>
-                        <code class="text-sm text-red-700">.../analisis.html?data=namaanda</code>
-                    </p>
-                </div>
-                
-                <a href="analisis.html" 
-                   class="inline-block bg-blue-600 text-white font-bold text-lg px-8 py-3 rounded-lg shadow-md hover:bg-blue-700 transition duration-300 mt-4">
-                    Pergi ke Halaman Semakan
-                </a>
-
-            </section>
-
-        </div>
-    </div>
-    
-    <footer class="text-center text-gray-500 py-6 mt-8">
-        © 2025 Laman PROPKES | Institut Aminuddin Baki
-    </footer>
-
-    <script>
-        function showSection(sectionId) {
-            // Sembunyikan semua seksyen
-            document.querySelectorAll('.content-section').forEach(section => {
-                section.classList.remove('active');
-            });
-            
-            // Paparkan seksyen yang diklik
-            const activeSection = document.getElementById(sectionId);
-            if (activeSection) {
-                activeSection.classList.add('active');
-            }
-            
-            // Kemas kini stail butang nav
-            document.querySelectorAll('.nav-button').forEach(button => {
-                button.classList.remove('active');
-            });
-            
-            // Tambah stail 'active' pada butang yang diklik
-            const activeButton = document.querySelector(`.nav-button[onclick="showSection('${sectionId}')"]`);
-            if (activeButton) {
-                activeButton.classList.add('active');
-            }
-        }
-    </script>
-
-    <script>
-        // Skrip ini hanya akan berjalan apabila tab 'Tanggungjawab' aktif
-        // atau apabila DOM dimuatkan
-        document.addEventListener('DOMContentLoaded', function() {
-            // Logik untuk Penjana AI
-            const generateBtn = document.getElementById('generate-button');
-            const resultsContainer = document.getElementById('ai-results-container');
-            const careerStageEl = document.getElementById('career-stage');
-            const interestAreaEl = document.getElementById('interest-area');
-            
-            // --- PEMBETULAN KESELAMATAN PENTING ---
-            // Kunci API anda telah dialih keluar dari sini.
-            // Persekitaran pengehosan akan menyediakannya secara automatik.
-            // Inilah tempat apiKey yang saya sebutkan, di dalam fail index.html
-            const apiKey ="AIzaSyD7H9dav4rHZmhguhpt-mPKvWo8SO95TNk";
-
-            if (generateBtn) {
-                generateBtn.addEventListener('click', async () => {
-                    const careerStage = careerStageEl.value;
-                    const interestArea = interestAreaEl.value.trim();
-                    
-                    generateBtn.disabled = true;
-                    generateBtn.innerHTML = `
-                        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Menjana...
-                    `;
-                    resultsContainer.innerHTML = '<div class="loader"></div>';
-
-                    const prompt = `
-                        Anda adalah seorang penasihat akademik pakar untuk Program Peningkatan Profesionalisme Pengurusan dan Kepimpinan Sekolah (PROPKES) di Malaysia. Seorang peserta memerlukan bantuan untuk sumbang saran tajuk fokus kajian semasa program sangkutan mereka di sekolah.
-                        Profil Peserta:
-                        - Peringkat Kerjaya: ${careerStage}
-                        - Bidang Minat Utama: ${interestArea}
-                        Berdasarkan profil ini, jana TIGA cadangan tajuk fokus kajian yang berbeza, spesifik, dan boleh dilaksanakan. Untuk setiap cadangan, berikan:
-                        1.  **Tajuk Kajian:** Satu tajuk yang jelas dan menarik.
-                        2.  **Fokus Utama:** Satu ayat penerangan tentang apa yang akan disiasat oleh peserta.
-                        3.  **Soalan Kajian:** Dua atau tiga soalan spesifik yang boleh dijawab oleh peserta semasa program sangkutan mereka.
-                        Pastikan cadangan anda praktikal dan relevan dengan konteks sekolah di Malaysia. Gunakan format Markdown untuk jawapan anda.
-                        PENTING: Jangan gunakan format jadual atau sebarang aksara paip ('|') dalam jawapan anda. Gunakan senarai (bullet points) dan teks tebal (bold) sahaja untuk format.
-                    `;
-
-                    try {
-                        // Ralat percubaan semula (exponential backoff)
-                        let response;
-                        let retries = 0;
-                        const maxRetries = 5;
-                        let delay = 1000; // 1 saat
-
-                        while (retries < maxRetries) {
-                            // AMARAN: Kunci API yang kosong akan gagal. 
-                            // Anda perlu menggantikan "" dengan kunci anda yang sebenar
-                            // ATAU sediakannya melalui 'environment variables'
-                            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-                            
-                            // Jika 'apiKey' masih kosong, jangan teruskan
-                            if (apiKey === "") {
-                                throw new Error("Kunci API (apiKey) tidak ditetapkan.");
-                            }
-
-                            const payload = { contents: [{ parts: [{ text: prompt }] }] };
-
-                            response = await fetch(apiUrl, {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify(payload)
-                            });
-
-                            if (response.ok) {
-                                break; // Berjaya, keluar dari gelung
-                            }
-                            
-                            // Jika gagal (cth: 429 Too Many Requests), tunggu dan cuba lagi
-                            if (response.status === 429) {
-                                retries++;
-                                if (retries >= maxRetries) {
-                                    throw new Error(`Permintaan API gagal selepas ${maxRetries} percubaan (Kadar Had): ${response.status}.`);
-                                }
-                                await new Promise(resolve => setTimeout(resolve, delay + Math.random() * 1000));
-                                delay *= 2; // Gandakan masa menunggu
-                            } else {
-                                // Ralat lain (cth: 400 Bad Request, 500 Server Error)
-                                throw new Error(`Permintaan API gagal: ${response.status}.`);
-                            }
-                        }
-
-                        const result = await response.json();
-                        const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
-
-                        if (text) {
-                            let html = text
-                                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                                .replace(/### (.*)/g, '<h3 class="text-xl font-bold text-indigo-800 mt-6 mb-2">$1</h3>')
-                                .replace(/## (.*)/g, '<h3 class="text-xl font-bold text-indigo-800 mt-6 mb-2">$1</h3>')
-                                .replace(/^\* (.*)$/gm, '<li>$1</li>')
-                                .replace(/((<li>.*<\/li>\s*)+)/gs, '<ul class="list-disc list-inside mt-2 text-gray-700 space-y-1">$1</ul>')
-                                .replace(/\n/g, '<br>')
-                                .replace(/<br><br>/g, '<br>')
-                                .replace(/<br><ul>/g, '<ul>')
-                                .replace(/<\/ul><br>/g, '</ul>');
-
-                            resultsContainer.innerHTML = `<div class="ai-results bg-indigo-50 p-6 rounded-lg">${html}</div>`;
-                        } else {
-                            console.error("Invalid response from API:", result);
-                            resultsContainer.innerHTML = '<p class="text-center text-yellow-600 font-semibold">Gagal memproses respons. Ini mungkin disebabkan oleh tapisan keselamatan kandungan. Sila cuba kata kunci yang berbeza.</p>';
-                        }
-
-                    } catch (error) {
-                        console.error('Error during AI generation:', error);
-                        resultsContainer.innerHTML = `<p class="text-center text-red-500 font-semibold">Maaf, berlaku ralat teknikal. ${error.message}</p>`;
-                    } finally {
-                        generateBtn.disabled = false;
-                        generateBtn.innerHTML = 'Jana Cadangan';
-                    }
-                });
-            }
-
-            // Logik untuk Animasi Carta Alir (Intersection Observer)
-            const milestones = document.querySelectorAll('.milestone');
-            if (milestones.length > 0) {
-                const observer = new IntersectionObserver((entries) => {
-                    entries.forEach(entry => {
-                        if (entry.isIntersecting) {
-                            entry.target.classList.add('is-visible');
-                        }
-                    });
-                }, { threshold: 0.1 });
-
-                milestones.forEach(milestone => {
-                    observer.observe(milestone);
-                });
-            }
-        });
-    </script><!DOCTYPE html>
-<html lang="ms">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laman Utama PROPKES</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <!-- Fon untuk Portal dan Carta Alir -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -685,7 +144,7 @@
                 Tanggungjawab Peserta
             </button>
             <button class="nav-button px-4 py-2 rounded-md font-semibold text-gray-700 hover:bg-blue-100" onclick="showSection('galeri')">
-                Galeri & Muat Naik
+                Penghantaran Tugasan
             </button>
             <button class="nav-button px-4 py-2 rounded-md font-semibold text-gray-700 hover:bg-blue-100" onclick="showSection('kompetensi')">
                 Semakan Kompetensi
@@ -695,49 +154,45 @@
         <!-- Kandungan (dalam kad putih) -->
         <div class="bg-white rounded-lg shadow-xl p-6 md:p-10 min-h-[400px]">
 
-            <!-- Bahagian 1: Laman Utama (dari Buku PROPKES) -->
+            <!-- Bahagian 1: Laman Utama (Kandungan dari BUKU PROPKES.pdf) -->
             <section id="utama" class="content-section active space-y-4">
                 <h2 class="text-2xl font-bold text-blue-800 border-b-2 border-blue-200 pb-2">Selamat Datang ke Laman PROPKES</h2>
                 
                 <p class="text-lg">
-                    <!-- 
-                        ARAHAN UNTUK ANDA:
-                        Salin (copy) pengenalan, matlamat, atau mukadimah
-                        dari 'BUKU PROPKES.pdf' anda dan tampal (paste) di sini
-                        menggantikan perenggan ini.
-                    -->
-                    Ini adalah hab maklumat pusat anda untuk Program Peningkatan Profesional Pengurusan dan Kepimpinan Sekolah (PROPKES). Di sini anda boleh mencari maklumat penting, pautan, dan tanggungjawab anda sebagai peserta.
+                    <!-- KANDUNGAN DIMASUKKAN DARI BUKU PROPKES.PDF -->
+                    Selamat datang ke hab maklumat pusat anda untuk Program Peningkatan Profesional Pengurusan dan Kepimpinan Sekolah (PROPKES). 
+                    PROPKES adalah program pembangunan individu dalam perkhidmatan yang memberi peluang kepada pensyarah Institut Aminuddin Baki (IAB) 
+                    untuk disandarkan selama 3 bulan secara berterusan di institusi pendidikan. 
+                    Ini bertujuan untuk melaksanakan aktiviti profesional yang telah ditetapkan, mendapatkan pengalaman dan pendedahan 
+                    mengenai amalan kepimpinan serta pengurusan dalam situasi sebenar.
                 </p>
 
                 <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-md">
                     <h3 class="text-xl font-semibold text-blue-900">Objektif Program</h3>
-                    <!-- 
-                        ARAHAN UNTUK ANDA:
-                        Salin (copy) senarai objektif dari 'BUKU PROPKES.pdf'
-                        dan tampal (paste) di sini sebagai senarai.
-                    -->
+                    <!-- KANDUNGAN DIMASUKKAN DARI BUKU PROPKES.PDF (Halaman 9) -->
                     <ul class="list-disc list-inside mt-2 space-y-1">
-                        <li>(Placeholder) Meningkatkan pengetahuan dan kemahiran...</li>
-                        <li>(Placeholder) Membangunkan kompetensi kepimpinan...</li>
-                        <li>(Placeholder) Menerajui perubahan dan inovasi di sekolah...</li>
+                        <li>Meningkatkan keupayaan dan kompetensi pensyarah ke arah pengendalian sesi latihan yang berkualiti dan berkesan.</li>
+                        <li>Memberikan pengalaman dan situasi sebenar tentang peranan dan tanggungjawab pemimpin sekolah.</li>
+                        <li>Menyediakan pembangunan profesionalisme berterusan kepada semua pensyarah IAB.</li>
                     </ul>
                 </div>
                 
                 <h3 class="text-xl font-semibold text-blue-900 pt-4">Struktur Program</h3>
-                <!-- 
+                 <!-- 
                     ARAHAN UNTUK ANDA:
-                    Salin (copy) maklumat mengenai struktur program
-                    dari 'BUKU PROPKES.pdf' dan tampal (paste) di sini.
+                    Anda boleh salin (copy) maklumat lanjut mengenai struktur program
+                    dari 'BUKU PROPKES.pdf' (cth: Halaman 13-14, Bahagian 3.3 & 3.4) 
+                    dan tampal (paste) di sini.
                 -->
-                <p>(Placeholder) Program ini terdiri daripada beberapa fasa yang merangkumi pembelajaran secara bersemuka, dalam talian, dan tugasan lapangan...</p>
+                <p>(Placeholder) Program ini terdiri daripada beberapa fasa yang merangkumi pembelajaran secara bersemuka, dalam talian, dan tugasan lapangan (job shadowing) selama tiga bulan. Peserta akan dibimbing oleh 'coach' (Ketua Jabatan) dan 'mentor' (PGB di sekolah) sepanjang program.</p>
 
             </section>
 
-            <!-- Bahagian 2: Tanggungjawab Peserta (KANDUNGAN BARU DIMASUKKAN) -->
+            <!-- Bahagian 2: Tanggungjawab Peserta (Carta Alir Interaktif) -->
             <!-- Tambah 'position: relative' dan 'overflow-hidden' untuk membetulkan penjajaran 'timeline-path' -->
             <section id="tanggungjawab" class="content-section relative overflow-hidden">
                 
-                <!-- ----- MULA KOD CARTA ALIR BARU ----- -->
+                <!-- ----- MULA KOD CARTA ALIR ----- -->
                 <header class="text-center mb-12">
                     <h1 class="text-4xl font-extrabold text-gray-800 tracking-tight">Carta Alir Interaktif PROPKES 2025-2026</h1>
                     <p class="text-lg text-gray-500 mt-2 max-w-3xl mx-auto">Perjalanan Peningkatan Profesionalisme anda.</p>
@@ -746,6 +201,7 @@
                 <div class="relative">
                     <div class="timeline-path"></div>
                     
+                    <!-- Milestone 1: Persediaan Awal -->
                     <div class="milestone relative mb-12">
                         <div class="milestone-dot"></div>
                         <div class="milestone-card flex flex-col items-start bg-white p-6 rounded-xl shadow-lg border border-gray-200">
@@ -755,7 +211,8 @@
                             <div class="mt-4 space-y-2 text-sm text-gray-700 w-full">
                                 <p><strong>1. Kenal Pasti Lokasi (4 Okt)</strong></p>
                                 <p><strong>2. Taklimat Peserta (24 Okt)</strong></p>
-                                <p><strong>3. Taklimat Bersama (28 Okt)</strong></p>
+                                <!-- TARIKH DIKEMASKINI berdasarkan LAMPIRAN A -->
+                                <p><strong>3. Taklimat Bersama (31 Okt)</strong></p>
                             </div>
                             <div class="flex flex-wrap gap-3 mt-4">
                                 <a href="https://docs.google.com/spreadsheets/d/1Brh6wdw78O3u1GUGkwCgGp38AyegvLh5l1ZjyLm7Yks/edit?usp=sharing" target="_blank" class="task-button text-white font-semibold py-2 px-4 rounded-lg">Senarai Penempatan</a>
@@ -765,6 +222,7 @@
                         </div>
                     </div>
 
+                    <!-- Milestone 2: Pra-Program -->
                     <div class="milestone relative mb-12">
                          <div class="milestone-dot"></div>
                          <div class="milestone-card flex flex-col items-start bg-white p-6 rounded-xl shadow-lg border border-gray-200">
@@ -778,6 +236,7 @@
                         </div>
                     </div>
 
+                    <!-- Milestone 3: Pelaksanaan Fasa 1 -->
                      <div class="milestone relative mb-12">
                          <div class="milestone-dot"></div>
                          <div class="milestone-card flex flex-col items-start bg-white p-6 rounded-xl shadow-lg border border-gray-200">
@@ -802,6 +261,7 @@
                         </div>
                     </div>
                     
+                    <!-- Milestone 4: Pelaksanaan Fasa 2 -->
                      <div class="milestone relative mb-12">
                          <div class="milestone-dot"></div>
                          <div class="milestone-card flex flex-col items-start bg-white p-6 rounded-xl shadow-lg border border-gray-200">
@@ -825,6 +285,7 @@
                         </div>
                     </div>
                     
+                    <!-- Milestone 5: Penilaian & Penghantaran -->
                      <div class="milestone relative mb-12">
                          <div class="milestone-dot"></div>
                          <div class="milestone-card flex flex-col items-start bg-white p-6 rounded-xl shadow-lg border border-gray-200">
@@ -843,6 +304,7 @@
                     </div>
                 </div>
 
+                <!-- Bahagian Penjana AI -->
                 <section class="mt-12 bg-gray-50 p-6 rounded-xl shadow-inner border border-gray-200">
                     <div class="text-center">
                         <h2 class="text-3xl font-bold text-gray-800">✨ Jana Cadangan Fokus PROPKES Anda</h2>
@@ -892,33 +354,34 @@
 
             </section>
             
-            <!-- Bahagian 3: Galeri & Muat Naik Bahan -->
+            <!-- Bahagian 3: Galeri & Muat Naik Bahan (DIKEMASKINI) -->
             <section id="galeri" class="content-section space-y-4">
-                <h2 class="text-2xl font-bold text-blue-800 border-b-2 border-blue-200 pb-2">Galeri & Muat Naik Bahan</h2>
+                <h2 class="text-2xl font-bold text-blue-800 border-b-2 border-blue-200 pb-2">Penghantaran Tugasan Akhir</h2>
                 
                 <p class="text-lg">
-                    Peserta digalakkan untuk memuat naik gambar dan bahan tugasan ke folder Google Drive yang dikongsi.
+                    Semua peserta dikehendaki memuat naik tugasan akhir mereka (Lampiran D, E, F, dan G) ke folder Google Drive rasmi program.
                 </p>
                 
                 <p class="text-gray-600">
-                    Sila muat naik semua bahan anda (gambar program, tugasan, dll.) ke pautan di bawah. Pastikan anda menamakan fail anda mengikut format yang ditetapkan.
+                    Sila pastikan anda menamakan fail anda mengikut format yang ditetapkan sebelum memuat naik ke pautan di bawah. Pautan ini adalah untuk penghantaran akhir sebelum 29 Mac 2026.
                 </p>
 
                 <!-- 
-                    ARAHAN UNTUK ANDA:
-                    1. Pergi ke Google Drive.
-                    2. Cipta satu folder baru (cth: "Bahan PROPKES 2025").
-                    3. Klik kanan pada folder itu -> Share -> Share.
-                    4. Tukar "General access" dari "Restricted" kepada "Anyone with the link".
-                    5. Tukar "Role" kepada "Editor" (supaya peserta boleh muat naik).
-                    6. Salin (copy) pautan itu.
-                    7. Tampal (paste) pautan itu di bawah, menggantikan "PAUTAN_GOOGLE_DRIVE_ANDA_DI_SINI".
+                    PAUTAN DIKEMASKINI:
+                    Pautan ini diambil dari LAMPIRAN A (Tugas Bil. 15)
                 -->
-                <a href="PAUTAN_GOOGLE_DRIVE_ANDA_DI_SINI" 
+                <a href="https://drive.google.com/drive/folders/1PfzBbH5CftPJJqoZGpPMD8n8O3UdpnXp?usp=sharing" 
                    target="_blank" 
                    class="inline-block bg-green-600 text-white font-bold text-lg px-8 py-3 rounded-lg shadow-md hover:bg-green-700 transition duration-300">
-                    Buka Folder Muat Naik Google Drive
+                    Buka Folder Penghantaran Tugasan
                 </a>
+                
+                <div class="bg-gray-50 border-l-4 border-gray-500 p-4 rounded-md mt-6">
+                    <h3 class="text-xl font-semibold text-gray-900">Untuk Muat Naik Gambar/Bahan Program</h3>
+                     <p class="mt-1">
+                        Jika anda perlu pautan untuk memuat naik gambar-gambar sepanjang program (selain dari tugasan akhir), sila hubungi urus setia untuk pautan Google Drive "Editor" yang berasingan.
+                    </p>
+                </div>
 
             </section>
 
@@ -930,7 +393,7 @@
                     Anda boleh menyemak laporan kompetensi individu (i-PROPKES Pra) anda melalui pautan unik yang telah dihantar kepada anda melalui e-mel atau mesej.
                 </p>
                 <p class="text-gray-600">
-                    Jika anda mempunyai pautan unik anda, sila guna pautan tersebut. Pautan di bawah hanya akan membawa anda ke halaman semakan, tetapi ia memerlukan pautan unik penuh untuk memaparkan data anda.
+                    Jika anda mempunyai pautan unik anda, klik butang di bawah. Jika tidak, sila rujuk e-mel anda.
                 </p>
                 
                 <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded-md">
@@ -940,19 +403,16 @@
                     </p>
                     <p class="mt-2">
                         Contoh pautan unik anda kelihatan seperti: <br>
-                        <!-- 
-                            ARAHAN: Pautan ini akan dikemas kini secara dinamik 
-                            berdasarkan URL laman web anda.
-                        -->
-                        <code id="example-link" class="text-sm text-red-700">.../analisis.html?data=namaanda</code>
+                        <code class="text-sm text-red-700">.../analisis.html?data=namaanda</code>
                     </p>
                 </div>
                 
                 <!-- 
-                    ARAHAN:
-                    Pautan ini akan membawa pengguna ke halaman 'analisis.html'.
-                    Halaman itu akan memaparkan "Pautan tidak lengkap" jika mereka tidak 
-                    menggunakan pautan unik mereka. Ini adalah tingkah laku yang betul.
+                    NOTA:
+                    Pautan ini akan membawa pengguna ke halaman 'analisis.html'. 
+                    Fail ini tidak dibekalkan, jadi saya tidak dapat menggabungkannya.
+                    Pastikan fail 'analisis.html' wujud dalam folder yang sama
+                    apabila anda memuat naik ke GitHub.
                 -->
                 <a href="analisis.html" 
                    class="inline-block bg-blue-600 text-white font-bold text-lg px-8 py-3 rounded-lg shadow-md hover:bg-blue-700 transition duration-300 mt-4">
@@ -994,39 +454,28 @@
                 activeButton.classList.add('active');
             }
         }
+    </script>
 
-        // --- Skrip Tambahan ---
+    <!-- Skrip JavaScript BARU untuk Carta Alir dan AI -->
+    <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Kemas kini pautan contoh secara dinamik
-            const exampleLink = document.getElementById('example-link');
-            if (exampleLink) {
-                // Dapatkan pautan asas laman web ini
-                const baseUrl = window.location.href.split('?')[0].replace('index.html', '');
-                exampleLink.textContent = `${baseUrl}analisis.html?data=namaanda`;
-            }
-
             // Logik untuk Penjana AI
             const generateBtn = document.getElementById('generate-button');
             const resultsContainer = document.getElementById('ai-results-container');
             const careerStageEl = document.getElementById('career-stage');
             const interestAreaEl = document.getElementById('interest-area');
             
-            // --- PEMBETULAN KESELAMATAN PENTING ---
-            // Kunci API anda telah dialih keluar dari sini.
-            // Persekitaran pengehosan akan menyediakannya secara automatik.
-            // Inilah tempat apiKey yang saya sebutkan, di dalam fail index.html
-            const apiKey = ""; // KUNCI API DI SINI
+            // --- PEMBETULAN PENTING ---
+            // Kunci API sengaja dibiarkan kosong (""). 
+            // Persekitaran pengehosan (seperti Canvas) akan menyediakannya secara automatik.
+            // JANGAN letakkan kunci API anda di sini, terutamanya jika dimuat naik ke GitHub.
+            const apiKey = ""; 
 
             if (generateBtn) {
                 generateBtn.addEventListener('click', async () => {
                     const careerStage = careerStageEl.value;
                     const interestArea = interestAreaEl.value.trim();
                     
-                    if (apiKey === "") {
-                         resultsContainer.innerHTML = `<p class="text-center text-red-500 font-semibold">Ralat Konfigurasi: Kunci API (apiKey) tidak ditetapkan oleh pembangun.</p>`;
-                         return;
-                    }
-
                     generateBtn.disabled = true;
                     generateBtn.innerHTML = `
                         <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -1057,8 +506,13 @@
                         const maxRetries = 5;
                         let delay = 1000; // 1 saat
 
+                        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+                        
+                        // Jika 'apiKey' masih kosong (seperti yang sepatutnya dalam persekitaran ini),
+                        // ia akan disediakan oleh persekitaran itu sendiri.
+                        // Kod ini kini selamat untuk GitHub kerana tiada kunci rahsia di dalamnya.
+
                         while (retries < maxRetries) {
-                            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
                             const payload = { contents: [{ parts: [{ text: prompt }] }] };
 
                             response = await fetch(apiUrl, {
@@ -1081,6 +535,13 @@
                                 delay *= 2; // Gandakan masa menunggu
                             } else {
                                 // Ralat lain (cth: 400 Bad Request, 500 Server Error)
+                                 // Semak jika 'apiKey' tidak disediakan oleh persekitaran
+                                if (response.status === 400) {
+                                     const errorData = await response.json();
+                                     if (errorData.error && errorData.error.message.includes("API key not valid")) {
+                                        throw new Error("Konfigurasi Ralat: Kunci API (apiKey) tidak disediakan oleh persekitaran hos.");
+                                     }
+                                }
                                 throw new Error(`Permintaan API gagal: ${response.status}.`);
                             }
                         }
@@ -1108,6 +569,7 @@
 
                     } catch (error) {
                         console.error('Error during AI generation:', error);
+                        // Paparkan mesej ralat yang spesifik
                         resultsContainer.innerHTML = `<p class="text-center text-red-500 font-semibold">Maaf, berlaku ralat teknikal. ${error.message}</p>`;
                     } finally {
                         generateBtn.disabled = false;
@@ -1136,9 +598,3 @@
 
 </body>
 </html>
-
-</body>
-</html>
-```eof
-
-
